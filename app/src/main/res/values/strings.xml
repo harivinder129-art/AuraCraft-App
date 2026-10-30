@@ -1,0 +1,7 @@
+<resources>
+    <!-- ============================================================== -->
+    <!-- 👉 CHANGE YOUR APP NAME HERE:                                 -->
+    <!-- Replace "My WebView App" with your desired app title          -->
+    <!-- ============================================================== -->
+    <string name="app_name">AuraCraft Toolkit</string>
+</resources>
