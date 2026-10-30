@@ -190,6 +190,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupSwipeToRefresh() {
+        // Fix: SwipeRefreshLayout wraps a FrameLayout, which doesn't scroll on its own.
+        // We explicitly tell SwipeRefreshLayout to check the WebView's scroll position instead,
+        // preventing downward scroll gestures from accidentally triggering a page reload.
+        binding.swipeRefresh.setOnChildScrollUpCallback { _, _ ->
+            binding.webView.canScrollVertically(-1) || binding.webView.scrollY > 0
+        }
+
+        // Dynamically enable pull-to-refresh ONLY when at the very top of the page
+        binding.webView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+            binding.swipeRefresh.isEnabled = (scrollY == 0 && !binding.webView.canScrollVertically(-1))
+        }
+
         binding.swipeRefresh.setOnRefreshListener {
             if (isNetworkAvailable()) {
                 binding.webView.reload()
