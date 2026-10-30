@@ -56,7 +56,6 @@ class MainActivity : AppCompatActivity() {
 
         setupBackNavigation()
         setupWebView()
-        setupSwipeToRefresh()
         setupRetryButton()
 
         // Load your website URL or display the offline error screen
@@ -71,6 +70,10 @@ class MainActivity : AppCompatActivity() {
     private fun setupWebView() {
         val webView = binding.webView
         val settings = webView.settings
+
+        // Enable native scrollbars and natural overscroll
+        webView.isVerticalScrollBarEnabled = true
+        webView.overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
 
         // HTML5 & JavaScript permissions
         settings.javaScriptEnabled = true
@@ -101,7 +104,6 @@ class MainActivity : AppCompatActivity() {
                     binding.progressBar.progress = newProgress
                 } else {
                     binding.progressBar.visibility = View.GONE
-                    binding.swipeRefresh.isRefreshing = false
                 }
             }
 
@@ -135,7 +137,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
-                binding.swipeRefresh.isRefreshing = false
+                binding.progressBar.visibility = View.GONE
             }
 
             override fun onReceivedError(
@@ -185,29 +187,6 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Download started...", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Toast.makeText(this, "Download failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun setupSwipeToRefresh() {
-        // Fix: SwipeRefreshLayout wraps a FrameLayout, which doesn't scroll on its own.
-        // We explicitly tell SwipeRefreshLayout to check the WebView's scroll position instead,
-        // preventing downward scroll gestures from accidentally triggering a page reload.
-        binding.swipeRefresh.setOnChildScrollUpCallback { _, _ ->
-            binding.webView.canScrollVertically(-1) || binding.webView.scrollY > 0
-        }
-
-        // Dynamically enable pull-to-refresh ONLY when at the very top of the page
-        binding.webView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-            binding.swipeRefresh.isEnabled = (scrollY == 0 && !binding.webView.canScrollVertically(-1))
-        }
-
-        binding.swipeRefresh.setOnRefreshListener {
-            if (isNetworkAvailable()) {
-                binding.webView.reload()
-            } else {
-                binding.swipeRefresh.isRefreshing = false
-                showErrorState(true)
             }
         }
     }
